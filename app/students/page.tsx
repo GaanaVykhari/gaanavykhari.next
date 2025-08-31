@@ -51,7 +51,9 @@ export default function StudentsPage() {
     try {
       const params = new URLSearchParams();
       params.set('page', String(reset ? 1 : page));
-      if (debouncedSearch) params.set('search', debouncedSearch);
+      if (debouncedSearch) {
+        params.set('search', debouncedSearch);
+      }
       const res = await fetch(`/api/student/all?${params.toString()}`, {
         cache: 'no-store',
       });
@@ -81,7 +83,9 @@ export default function StudentsPage() {
   }, [debouncedSearch]);
 
   useEffect(() => {
-    if (page > 1) load();
+    if (page > 1) {
+      load();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 

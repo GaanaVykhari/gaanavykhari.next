@@ -63,7 +63,9 @@ async function createClientWithFallback(uri: string): Promise<MongoClient> {
 export function getMongoClient(): Promise<MongoClient> {
   if (!client) {
     const uri = process.env.MONGODB_URI;
-    if (!uri) throw new Error('Missing MONGODB_URI');
+    if (!uri) {
+      throw new Error('Missing MONGODB_URI');
+    }
 
     // Use fallback connection strategy
     client = new MongoClient(uri, {
@@ -79,7 +81,9 @@ export function getMongoClient(): Promise<MongoClient> {
   }
   if (!clientPromise) {
     const uri = process.env.MONGODB_URI;
-    if (!uri) throw new Error('Missing MONGODB_URI');
+    if (!uri) {
+      throw new Error('Missing MONGODB_URI');
+    }
     clientPromise = createClientWithFallback(uri);
   }
   return clientPromise;
@@ -87,7 +91,9 @@ export function getMongoClient(): Promise<MongoClient> {
 
 export async function getDb(): Promise<Db> {
   const dbName = process.env.MONGODB_DB;
-  if (!dbName) throw new Error('Missing MONGODB_DB');
+  if (!dbName) {
+    throw new Error('Missing MONGODB_DB');
+  }
   const c = await getMongoClient();
   return c.db(dbName);
 }

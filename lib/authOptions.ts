@@ -15,9 +15,13 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === 'development',
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider !== 'google') return false;
+      if (account?.provider !== 'google') {
+        return false;
+      }
       const email = user?.email?.toLowerCase();
-      if (!email) return false;
+      if (!email) {
+        return false;
+      }
 
       try {
         // Try to connect to MongoDB with timeout
@@ -34,7 +38,9 @@ export const authOptions: NextAuthOptions = {
         const allowed = await db
           .collection('users')
           .findOne({ username: email });
-        if (!allowed) return false;
+        if (!allowed) {
+          return false;
+        }
 
         // Use relative URL for internal API calls to avoid SSL issues
         const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
@@ -78,12 +84,15 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token, user }) {
       const backendToken =
         (user as any)?.__backendToken || (token as any)?.backendToken;
-      if (backendToken) (session as any).backendToken = backendToken;
+      if (backendToken) {
+        (session as any).backendToken = backendToken;
+      }
       return session;
     },
     async jwt({ token, user }) {
-      if (user && (user as any).__backendToken)
+      if (user && (user as any).__backendToken) {
         (token as any).backendToken = (user as any).__backendToken;
+      }
       return token;
     },
   },

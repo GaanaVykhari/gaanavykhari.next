@@ -50,8 +50,12 @@ export default function StudentDetailPage({
     load();
   }, [id]);
 
-  if (loading) return <main style={{ padding: 16 }}>Loading...</main>;
-  if (!student) return <main style={{ padding: 16 }}>Student not found</main>;
+  if (loading) {
+    return <main style={{ padding: 16 }}>Loading...</main>;
+  }
+  if (!student) {
+    return <main style={{ padding: 16 }}>Student not found</main>;
+  }
 
   return (
     <main style={{ padding: 16 }}>

@@ -24,6 +24,7 @@ export default [
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'warn',
       'no-console': 'warn',
+      curly: ['error', 'all'],
     },
   },
   prettierConfig,

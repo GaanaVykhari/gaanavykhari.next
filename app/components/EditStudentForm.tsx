@@ -108,7 +108,9 @@ export default function EditStudentForm({
   }));
 
   const handleSubmit = async (values: typeof form.values) => {
-    if (!student?._id) return;
+    if (!student?._id) {
+      return;
+    }
 
     setLoading(true);
     try {
@@ -152,7 +154,9 @@ export default function EditStudentForm({
   };
 
   const handleDelete = async () => {
-    if (!student?._id) return;
+    if (!student?._id) {
+      return;
+    }
 
     if (
       !confirm(
