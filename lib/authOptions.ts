@@ -1,6 +1,7 @@
 import type { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { getDb } from '@/lib/mongo';
+import { Db } from 'mongodb';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -19,7 +20,17 @@ export const authOptions: NextAuthOptions = {
       if (!email) return false;
 
       try {
-        const db = await getDb();
+        // Try to connect to MongoDB with timeout
+        const db = (await Promise.race([
+          getDb(),
+          new Promise<never>((_, reject) =>
+            setTimeout(
+              () => reject(new Error('MongoDB connection timeout')),
+              10000
+            )
+          ),
+        ])) as Db;
+
         const allowed = await db
           .collection('users')
           .findOne({ username: email });
@@ -51,6 +62,16 @@ export const authOptions: NextAuthOptions = {
         return false;
       } catch (error) {
         console.error('SignIn callback error:', error);
+
+        // If it's a MongoDB connection error, we can still allow login
+        // but without the backend token (fallback behavior)
+        if (error instanceof Error && error.message.includes('MongoDB')) {
+          console.warn(
+            'MongoDB connection failed, allowing login without backend token'
+          );
+          return true;
+        }
+
         return false;
       }
     },

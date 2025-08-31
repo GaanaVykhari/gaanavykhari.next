@@ -7,7 +7,21 @@ export function getMongoClient(): Promise<MongoClient> {
   if (!client) {
     const uri = process.env.MONGODB_URI;
     if (!uri) throw new Error('Missing MONGODB_URI');
-    client = new MongoClient(uri, { maxPoolSize: 5 });
+
+    // Configure MongoDB client for production SSL/TLS
+    const options = {
+      maxPoolSize: 5,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      ssl: true,
+      tls: true,
+      tlsAllowInvalidCertificates: false,
+      tlsAllowInvalidHostnames: false,
+      retryWrites: true,
+      retryReads: true,
+    };
+
+    client = new MongoClient(uri, options);
   }
   if (!clientPromise) {
     clientPromise = client.connect();

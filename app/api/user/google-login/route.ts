@@ -12,7 +12,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const db = await getDb();
+    // Add timeout for MongoDB connection
+    const db = await Promise.race([
+      getDb(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('MongoDB connection timeout')), 10000)
+      ),
+    ]);
+
     const user = await db
       .collection('users')
       .findOne({ username: email.toLowerCase() });
@@ -39,6 +46,22 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error('Google login error:', error);
+
+    // Return a more specific error message for MongoDB connection issues
+    if (
+      error.message.includes('MongoDB') ||
+      error.message.includes('SSL') ||
+      error.message.includes('TLS')
+    ) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: 'Database connection error. Please try again later.',
+        },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json(
       { ok: false, message: 'Internal server error' },
       { status: 500 }
