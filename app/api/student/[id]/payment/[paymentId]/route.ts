@@ -1,27 +1,34 @@
 import { NextResponse } from 'next/server';
-import { proxyRequest } from '@/lib/apiClient';
-import { getAuthHeadersAsync } from '@/lib/auth';
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string; paymentId: string }> }
-) {
-  const body = await request.json();
-  const resolvedParams = await params;
-  try {
-    const data = await proxyRequest(
-      `/student/${resolvedParams.id}/payment/${resolvedParams.paymentId}`,
-      {
-        method: 'PATCH',
-        headers: await getAuthHeadersAsync(),
-        body,
-      }
-    );
-    return NextResponse.json(data);
-  } catch (err: any) {
-    return NextResponse.json(
-      { ok: false, message: err.message },
-      { status: 500 }
-    );
-  }
+export async function GET() {
+  // TODO: Implement individual payment details
+  return NextResponse.json(
+    {
+      ok: false,
+      message: 'Individual payment details not yet implemented',
+    },
+    { status: 501 }
+  );
+}
+
+export async function PATCH() {
+  // TODO: Implement payment updates
+  return NextResponse.json(
+    {
+      ok: false,
+      message: 'Payment updates not yet implemented',
+    },
+    { status: 501 }
+  );
+}
+
+export async function DELETE() {
+  // TODO: Implement payment deletion
+  return NextResponse.json(
+    {
+      ok: false,
+      message: 'Payment deletion not yet implemented',
+    },
+    { status: 501 }
+  );
 }

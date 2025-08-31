@@ -1,20 +1,35 @@
 import { NextResponse } from 'next/server';
-import { proxyRequest } from '@/lib/apiClient';
-import { getAuthHeadersAsync } from '@/lib/auth';
+import { getDb } from '@/lib/mongo';
+import { ObjectId } from 'mongodb';
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const resolvedParams = await params;
   try {
-    const data = await proxyRequest(`/student/${resolvedParams.id}`, {
-      headers: await getAuthHeadersAsync(),
+    const resolvedParams = await params;
+    const db = await getDb();
+    const collection = db.collection('students');
+
+    const student = await collection.findOne({
+      _id: new ObjectId(resolvedParams.id),
     });
-    return NextResponse.json(data?.data ?? data);
-  } catch (err: any) {
+
+    if (!student) {
+      return NextResponse.json(
+        { ok: false, message: 'Student not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      data: student,
+    });
+  } catch (error: any) {
+    console.error('Error fetching student:', error);
     return NextResponse.json(
-      { ok: false, message: err.message },
+      { ok: false, message: error.message || 'Failed to fetch student' },
       { status: 500 }
     );
   }
@@ -24,18 +39,37 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const body = await request.json();
-  const resolvedParams = await params;
   try {
-    const data = await proxyRequest(`/student/${resolvedParams.id}`, {
-      method: 'PATCH',
-      headers: await getAuthHeadersAsync(),
-      body,
+    const body = await request.json();
+    const resolvedParams = await params;
+    const db = await getDb();
+    const collection = db.collection('students');
+
+    const result = await collection.updateOne(
+      { _id: new ObjectId(resolvedParams.id) },
+      {
+        $set: {
+          ...body,
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return NextResponse.json(
+        { ok: false, message: 'Student not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      message: 'Student updated successfully',
     });
-    return NextResponse.json(data?.data ?? data);
-  } catch (err: any) {
+  } catch (error: any) {
+    console.error('Error updating student:', error);
     return NextResponse.json(
-      { ok: false, message: err.message },
+      { ok: false, message: error.message || 'Failed to update student' },
       { status: 500 }
     );
   }
@@ -45,16 +79,30 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const resolvedParams = await params;
   try {
-    const data = await proxyRequest(`/student/${resolvedParams.id}`, {
-      method: 'DELETE',
-      headers: await getAuthHeadersAsync(),
+    const resolvedParams = await params;
+    const db = await getDb();
+    const collection = db.collection('students');
+
+    const result = await collection.deleteOne({
+      _id: new ObjectId(resolvedParams.id),
     });
-    return NextResponse.json(data);
-  } catch (err: any) {
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json(
+        { ok: false, message: 'Student not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      message: 'Student deleted successfully',
+    });
+  } catch (error: any) {
+    console.error('Error deleting student:', error);
     return NextResponse.json(
-      { ok: false, message: err.message },
+      { ok: false, message: error.message || 'Failed to delete student' },
       { status: 500 }
     );
   }

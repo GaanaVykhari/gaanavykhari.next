@@ -1,25 +1,25 @@
 import { NextResponse } from 'next/server';
-import { proxyRequest } from '@/lib/apiClient';
-import { getAuthHeadersAsync } from '@/lib/auth';
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const resolvedParams = await params;
-  const { searchParams } = new URL(request.url);
-  const page = searchParams.get('page') || '';
-  const qs = new URLSearchParams({ ...(page && { page }) }).toString();
-  const path = `/student/${resolvedParams.id}/payments${qs ? `?${qs}` : ''}`;
-  try {
-    const data = await proxyRequest(path, {
-      headers: await getAuthHeadersAsync(),
-    });
-    return NextResponse.json(data?.data ?? data);
-  } catch (err: any) {
-    return NextResponse.json(
-      { ok: false, message: err.message },
-      { status: 500 }
-    );
-  }
+export async function GET() {
+  // TODO: Implement student payments
+  return NextResponse.json({
+    ok: true,
+    data: {
+      rows: [],
+      total: 0,
+      hasMore: false,
+    },
+    message: 'Student payments not yet implemented',
+  });
+}
+
+export async function POST() {
+  // TODO: Implement student payment creation
+  return NextResponse.json(
+    {
+      ok: false,
+      message: 'Student payments not yet implemented',
+    },
+    { status: 501 }
+  );
 }

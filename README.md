@@ -16,7 +16,6 @@ A Next.js application for managing music students, sessions, and payments with G
 - **Frontend**: Next.js 15, React 18, TypeScript
 - **UI**: Mantine v8
 - **Authentication**: NextAuth.js with Google Provider
-- **Backend**: Express.js API (separate service)
 - **Database**: MongoDB
 - **Code Quality**: ESLint, Prettier, Husky
 
@@ -62,9 +61,6 @@ npm run dev
 Create a `.env.local` file with the following variables:
 
 ```env
-# Backend API
-BACKEND_BASE_URL=http://localhost:3001
-
 # NextAuth
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your-secret-key
@@ -125,8 +121,6 @@ app/
 └── settings/      # Settings page
 
 lib/
-├── apiClient.ts   # API client utilities
-├── auth.ts        # Authentication helpers
 ├── authOptions.ts # NextAuth configuration
 └── mongo.ts       # MongoDB connection
 
@@ -136,7 +130,7 @@ types/
 
 ## API Endpoints
 
-The application proxies requests to a backend API:
+The application includes built-in API routes:
 
 - `/api/student/*` - Student management
 - `/api/sessions/*` - Session management

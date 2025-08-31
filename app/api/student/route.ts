@@ -1,19 +1,31 @@
 import { NextResponse } from 'next/server';
-import { proxyRequest } from '@/lib/apiClient';
-import { buildAuthHeaders } from '@/lib/auth';
+import { getDb } from '@/lib/mongo';
+import { ObjectId } from 'mongodb';
 
 export async function POST(request: Request) {
-  const body = await request.json();
   try {
-    const data = await proxyRequest('/student', {
-      method: 'POST',
-      headers: buildAuthHeaders(),
-      body,
+    const body = await request.json();
+    const db = await getDb();
+    const collection = db.collection('students');
+
+    // Add timestamps
+    const studentData = {
+      ...body,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const result = await collection.insertOne(studentData);
+
+    return NextResponse.json({
+      ok: true,
+      data: { ...studentData, _id: result.insertedId },
+      message: 'Student added successfully',
     });
-    return NextResponse.json(data);
-  } catch (err: any) {
+  } catch (error: any) {
+    console.error('Error adding student:', error);
     return NextResponse.json(
-      { ok: false, message: err.message },
+      { ok: false, message: error.message || 'Failed to add student' },
       { status: 500 }
     );
   }
