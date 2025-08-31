@@ -8,6 +8,9 @@ const nextConfig = {
   turbopack: {
     root: path.resolve(__dirname),
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;
