@@ -39,8 +39,29 @@ export default function Navigation({
 }) {
   const pathname = usePathname();
   const [opened, { toggle, close }] = useDisclosure();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
+
+  // If user is not authenticated, render just the children without navigation
+  if (status === 'unauthenticated') {
+    return <>{children}</>;
+  }
+
+  // If still loading, show a simple loading state
+  if (status === 'loading') {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
+        <Loader size={48} />
+      </div>
+    );
+  }
 
   const handleNavClick = () => {
     // Show loader when navigation item is clicked
