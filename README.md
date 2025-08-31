@@ -1,36 +1,157 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gaanavykhari Music Management System
+
+A Next.js application for managing music students, sessions, and payments with Google authentication.
+
+## Features
+
+- **Authentication**: Google OAuth integration with NextAuth.js
+- **Student Management**: CRUD operations for student records
+- **Session Tracking**: Track attendance and schedule sessions
+- **Payment Management**: Monitor fees and payment status
+- **Responsive Design**: Mobile-first UI with Mantine components
+- **TypeScript**: Full type safety throughout the application
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 18, TypeScript
+- **UI**: Mantine v8
+- **Authentication**: NextAuth.js with Google Provider
+- **Backend**: Express.js API (separate service)
+- **Database**: MongoDB
+- **Code Quality**: ESLint, Prettier, Husky
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- MongoDB instance
+- Google OAuth credentials
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd gaanavykhari.next
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Set up environment variables:
+
+```bash
+cp .env.example .env.local
+# Edit .env.local with your configuration
+```
+
+4. Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment Variables
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Create a `.env.local` file with the following variables:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+# Backend API
+BACKEND_BASE_URL=http://localhost:3001
 
-## Learn More
+# NextAuth
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key
 
-To learn more about Next.js, take a look at the following resources:
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DB=gaanavykhari
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Available Scripts
 
-## Deploy on Vercel
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint issues
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
+- `npm run type-check` - Run TypeScript type checking
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Git Hooks
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project uses Git hooks to ensure code quality:
+
+### Pre-commit Hook
+
+- Automatically formats staged files with Prettier
+- Runs ESLint on staged TypeScript/JavaScript files
+- Fixes auto-fixable issues
+
+### Pre-push Hook
+
+- Runs TypeScript type checking
+- Ensures no type errors before pushing
+
+## Code Quality Tools
+
+- **ESLint**: Code linting with Next.js and TypeScript rules
+- **Prettier**: Code formatting
+- **Husky**: Git hooks management
+- **lint-staged**: Run linters on staged files only
+
+## Project Structure
+
+```
+app/
+├── api/           # API routes
+├── globals.css    # Global styles
+├── layout.tsx     # Root layout
+├── page.tsx       # Home page
+├── login/         # Authentication pages
+├── students/      # Student management
+├── payments/      # Payment management
+└── settings/      # Settings page
+
+lib/
+├── apiClient.ts   # API client utilities
+├── auth.ts        # Authentication helpers
+├── authOptions.ts # NextAuth configuration
+└── mongo.ts       # MongoDB connection
+
+types/
+└── index.d.ts     # TypeScript type definitions
+```
+
+## API Endpoints
+
+The application proxies requests to a backend API:
+
+- `/api/student/*` - Student management
+- `/api/sessions/*` - Session management
+- `/api/payments/*` - Payment management
+- `/api/holiday/*` - Holiday management
+- `/api/user/*` - User authentication
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Ensure code passes linting and formatting
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
