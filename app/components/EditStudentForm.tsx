@@ -83,7 +83,7 @@ export default function EditStudentForm({
         inductionDate: new Date(student.inductionDate),
       });
     }
-  }, [student, opened, form]);
+  }, [student, opened]);
 
   const frequencyOptions = [
     { value: 'daily', label: 'Daily' },
@@ -244,6 +244,11 @@ export default function EditStudentForm({
             label="Induction Date"
             placeholder="Select induction date"
             required
+            styles={{
+              input: {
+                fontSize: 'var(--mantine-font-size-sm)',
+              },
+            }}
             {...form.getInputProps('inductionDate')}
           />
 

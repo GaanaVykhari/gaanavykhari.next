@@ -62,11 +62,11 @@ export default function StudentsPage() {
       }
 
       setStudents(prev => ({
-        total: data?.total ?? 0,
-        hasMore: data?.hasMore ?? false,
+        total: data?.data?.total ?? 0,
+        hasMore: data?.data?.hasMore ?? false,
         rows: reset
-          ? (data?.rows ?? [])
-          : [...prev.rows, ...(data?.rows ?? [])],
+          ? (data?.data?.rows ?? [])
+          : [...prev.rows, ...(data?.data?.rows ?? [])],
       }));
     } catch (error) {
       console.error('Error loading students:', error);

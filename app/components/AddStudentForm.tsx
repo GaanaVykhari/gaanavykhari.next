@@ -179,6 +179,11 @@ export default function AddStudentForm({
             label="Induction Date"
             placeholder="Select induction date"
             required
+            styles={{
+              input: {
+                fontSize: 'var(--mantine-font-size-sm)',
+              },
+            }}
             {...form.getInputProps('inductionDate')}
           />
 

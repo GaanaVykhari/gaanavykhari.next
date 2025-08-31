@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import {
   AppShell,
   Burger,
@@ -77,7 +78,13 @@ export default function Navigation({
               hiddenFrom="sm"
               size="sm"
             />
-            <Text size="lg" fw={600}>
+            <Image
+              src="/favicon.svg"
+              alt="Gaanavykhari Icon"
+              width={24}
+              height={24}
+            />
+            <Text size="xl" fw={800} style={{ letterSpacing: '0.5px' }}>
               Gaanavykhari
             </Text>
           </Group>
