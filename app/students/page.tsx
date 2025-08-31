@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Anchor,
   Button,
@@ -25,7 +25,7 @@ import {
   IconUserPlus,
   IconEdit,
 } from '@tabler/icons-react';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useDebouncedState } from '@mantine/hooks';
 import AddStudentForm from '@/app/components/AddStudentForm';
 import EditStudentForm from '@/app/components/EditStudentForm';
 import type { IStudent } from '@/types';
@@ -37,9 +37,9 @@ export default function StudentsPage() {
     total: number;
   }>({ rows: [], hasMore: false, total: 0 });
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useDebouncedState('', 300);
   const [loading, setLoading] = useState(false);
-  const debouncedSearch = useMemo(() => search, [search]);
   const [addModalOpened, { open: openAddModal, close: closeAddModal }] =
     useDisclosure(false);
   const [editModalOpened, { open: openEditModal, close: closeEditModal }] =
@@ -117,16 +117,16 @@ export default function StudentsPage() {
         </div>
 
         <Paper p="md" withBorder>
-          <Group gap="md" wrap="wrap">
-            <TextInput
-              placeholder="Search by name, email, or phone"
-              value={search}
-              onChange={e => setSearch(e.currentTarget.value)}
-              leftSection={<IconSearch size={16} />}
-              style={{ flex: 1, minWidth: 250 }}
-            />
-            <Button onClick={() => load({ reset: true })}>Search</Button>
-          </Group>
+          <TextInput
+            placeholder="Search by name, email, or phone"
+            value={searchInput}
+            onChange={e => {
+              setSearchInput(e.currentTarget.value);
+              setDebouncedSearch(e.currentTarget.value);
+            }}
+            leftSection={<IconSearch size={16} />}
+            style={{ maxWidth: 400 }}
+          />
         </Paper>
 
         <div>
@@ -200,7 +200,7 @@ export default function StudentsPage() {
               <Text ta="center" c="dimmed">
                 {loading
                   ? 'Loading students...'
-                  : `No students found. ${search ? 'Try adjusting your search criteria.' : 'Add your first student to get started.'}`}
+                  : `No students found. ${debouncedSearch ? 'Try adjusting your search criteria.' : 'Add your first student to get started.'}`}
               </Text>
             </Paper>
           )}
