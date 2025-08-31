@@ -5,7 +5,18 @@ let clientPromise: Promise<MongoClient> | undefined;
 
 async function createClientWithFallback(uri: string): Promise<MongoClient> {
   const connectionOptions = [
-    // Option 1: Strict SSL (default)
+    // Option 1: Standard SSL with validation
+    {
+      maxPoolSize: 5,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
+      ssl: true,
+      tls: true,
+      retryWrites: true,
+      retryReads: true,
+    },
+    // Option 2: SSL with invalid certificates allowed
     {
       maxPoolSize: 5,
       serverSelectionTimeoutMS: 10000,
@@ -17,23 +28,8 @@ async function createClientWithFallback(uri: string): Promise<MongoClient> {
       tlsAllowInvalidHostnames: true,
       retryWrites: true,
       retryReads: true,
-      tlsInsecure: false,
     },
-    // Option 2: More lenient SSL
-    {
-      maxPoolSize: 5,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 10000,
-      ssl: true,
-      tls: true,
-      tlsAllowInvalidCertificates: true,
-      tlsAllowInvalidHostnames: true,
-      retryWrites: true,
-      retryReads: true,
-      tlsInsecure: true,
-    },
-    // Option 3: Minimal SSL
+    // Option 3: No SSL/TLS (fallback)
     {
       maxPoolSize: 5,
       serverSelectionTimeoutMS: 10000,
@@ -77,11 +73,8 @@ export function getMongoClient(): Promise<MongoClient> {
       connectTimeoutMS: 10000,
       ssl: true,
       tls: true,
-      tlsAllowInvalidCertificates: true,
-      tlsAllowInvalidHostnames: true,
       retryWrites: true,
       retryReads: true,
-      tlsInsecure: false,
     });
   }
   if (!clientPromise) {
