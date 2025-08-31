@@ -1,23 +1,20 @@
 {
-    {
-        // Launch configuration for debugging Next.js app
-        "version": "0.2.0",
-        "configurations": [
-            {
-                "type": "pwa-node",
-                "request": "launch",
-                "name": "Next.js: debug server",
-                "runtimeExecutable": "npm",
-                "runtimeArgs": [
-                    "run",
-                    "dev"
-                ],
-                "port": 9229,
-                "console": "integratedTerminal",
-                "env": {
-                    "NODE_OPTIONS": "--inspect"
-                }
+    // Launch configuration for debuggng Next.js app
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Next.js: debug server",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "dev"
+            ],
+            "console": "integratedTerminal",
+            "env": {
+                "NODE_OPTIONS": "--inspect"
             }
-        ]
-    }
+        }
+    ]
 }
