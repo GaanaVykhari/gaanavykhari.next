@@ -11,30 +11,46 @@ export const authOptions: NextAuthOptions = {
   ],
   session: { strategy: 'jwt' },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider !== 'google') return false;
       const email = user?.email?.toLowerCase();
       if (!email) return false;
-      const db = await getDb();
-      const allowed = await db.collection('users').findOne({ username: email });
-      if (!allowed) return false;
+
       try {
-        const res = await fetch(
-          `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/user/google-login`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, name: user?.name }),
-          }
-        );
+        const db = await getDb();
+        const allowed = await db
+          .collection('users')
+          .findOne({ username: email });
+        if (!allowed) return false;
+
+        // Use relative URL for internal API calls to avoid SSL issues
+        const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+        const apiUrl = `${baseUrl}/api/user/google-login`;
+
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'NextAuth.js/4.24.11',
+          },
+          body: JSON.stringify({ email, name: user?.name }),
+        });
+
+        if (!res.ok) {
+          console.error('Google login API error:', res.status, res.statusText);
+          return false;
+        }
+
         const data = await res.json();
-        if (res.ok && (data as any)?.token) {
+        if ((data as any)?.token) {
           (user as any).__backendToken = (data as any).token;
           return true;
         }
         return false;
-      } catch {
+      } catch (error) {
+        console.error('SignIn callback error:', error);
         return false;
       }
     },
