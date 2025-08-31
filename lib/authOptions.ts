@@ -21,7 +21,7 @@ export const authOptions: NextAuthOptions = {
       if (!allowed) return false;
       try {
         const res = await fetch(
-          `${process.env.BACKEND_BASE_URL?.replace(/\/$/, '')}/user/google-login`,
+          `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/user/google-login`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
