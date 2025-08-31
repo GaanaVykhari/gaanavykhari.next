@@ -139,12 +139,6 @@ export default function Navigation({
       </AppShell.Header>
 
       <AppShell.Navbar p="md">
-        <AppShell.Section>
-          <Text size="lg" fw={600} mb="md">
-            Navigation
-          </Text>
-        </AppShell.Section>
-
         <AppShell.Section grow>
           <Stack gap="xs">
             {navigationItems.map(item => {
