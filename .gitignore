@@ -34,7 +34,6 @@ yarn-error.log*
 .env*
 # allow committed examples and production config
 !.env.example
-!.env.production
 
 # vercel
 .vercel
