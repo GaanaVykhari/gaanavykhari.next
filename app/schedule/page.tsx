@@ -173,33 +173,16 @@ export default function SchedulePage() {
 
         {/* Schedule Summary */}
         <Paper p="md" withBorder>
-          <Group gap="xl">
-            <Group gap="xs">
-              <IconCalendarEvent
-                size={20}
-                color="var(--mantine-color-blue-6)"
-              />
-              <div>
-                <Text size="sm" c="dimmed">
-                  Total Sessions Today
-                </Text>
-                <Text size="lg" fw={600}>
-                  {todaysSchedule.length}
-                </Text>
-              </div>
-            </Group>
-            <Divider orientation="vertical" />
-            <Group gap="xs">
-              <IconUser size={20} color="var(--mantine-color-green-6)" />
-              <div>
-                <Text size="sm" c="dimmed">
-                  Sessions Today
-                </Text>
-                <Text size="lg" fw={600}>
-                  {todaysSchedule.length}
-                </Text>
-              </div>
-            </Group>
+          <Group gap="xs">
+            <IconCalendarEvent size={20} color="var(--mantine-color-blue-6)" />
+            <div>
+              <Text size="sm" c="dimmed">
+                Total Sessions Today
+              </Text>
+              <Text size="lg" fw={600}>
+                {todaysSchedule.length}
+              </Text>
+            </div>
           </Group>
         </Paper>
 
