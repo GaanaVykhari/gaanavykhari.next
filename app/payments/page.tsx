@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import {
-  List,
   Title,
   Container,
   Stack,
@@ -12,12 +11,7 @@ import {
   Badge,
   Card,
 } from '@mantine/core';
-import {
-  IconCreditCard,
-  IconUser,
-  IconCalendar,
-  IconCurrencyRupee,
-} from '@tabler/icons-react';
+import { IconUser, IconCalendar, IconCurrencyRupee } from '@tabler/icons-react';
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<{

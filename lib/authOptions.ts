@@ -56,7 +56,6 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!res.ok) {
-          console.error('Google login API error:', res.status, res.statusText);
           return false;
         }
 
@@ -67,14 +66,9 @@ export const authOptions: NextAuthOptions = {
         }
         return false;
       } catch (error) {
-        console.error('SignIn callback error:', error);
-
         // If it's a MongoDB connection error, we can still allow login
         // but without the backend token (fallback behavior)
         if (error instanceof Error && error.message.includes('MongoDB')) {
-          console.warn(
-            'MongoDB connection failed, allowing login without backend token'
-          );
           return true;
         }
 

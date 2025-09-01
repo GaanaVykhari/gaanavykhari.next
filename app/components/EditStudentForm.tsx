@@ -12,13 +12,13 @@ import {
   Group,
   MultiSelect,
   ActionIcon,
-  Text,
 } from '@mantine/core';
 import { DateInput, TimeInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 import type { IStudent } from '@/types';
+import { ConfirmationModal } from './ConfirmationModal';
 
 interface EditStudentFormProps {
   opened: boolean;
@@ -34,6 +34,7 @@ export default function EditStudentForm({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteModalOpened, setDeleteModalOpened] = useState(false);
 
   const form = useForm({
     initialValues: {
@@ -83,7 +84,7 @@ export default function EditStudentForm({
         inductionDate: new Date(student.inductionDate),
       });
     }
-  }, [student, opened]);
+  }, [student, opened, form]);
 
   const frequencyOptions = [
     { value: 'daily', label: 'Daily' },
@@ -155,14 +156,6 @@ export default function EditStudentForm({
 
   const handleDelete = async () => {
     if (!student?._id) {
-      return;
-    }
-
-    if (
-      !confirm(
-        'Are you sure you want to delete this student? This action cannot be undone.'
-      )
-    ) {
       return;
     }
 
@@ -296,8 +289,7 @@ export default function EditStudentForm({
               variant="subtle"
               color="red"
               size="lg"
-              onClick={handleDelete}
-              loading={deleteLoading}
+              onClick={() => setDeleteModalOpened(true)}
               title="Delete student"
             >
               <IconTrash size={20} />
@@ -318,6 +310,18 @@ export default function EditStudentForm({
           </Group>
         </Stack>
       </form>
+
+      <ConfirmationModal
+        opened={deleteModalOpened}
+        onClose={() => setDeleteModalOpened(false)}
+        onConfirm={handleDelete}
+        title="Delete Student"
+        message="Are you sure you want to delete this student? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        confirmColor="red"
+        loading={deleteLoading}
+      />
     </Modal>
   );
 }

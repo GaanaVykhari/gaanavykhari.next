@@ -46,7 +46,6 @@ export async function GET(request: Request) {
       },
     });
   } catch (error: any) {
-    console.error('Error fetching students:', error);
     return NextResponse.json(
       { ok: false, message: error.message || 'Failed to fetch students' },
       { status: 500 }

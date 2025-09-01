@@ -8,12 +8,11 @@ import {
   Stack,
   Text,
   Title,
-  Button,
   Group,
   ActionIcon,
   Badge,
 } from '@mantine/core';
-import { IconEdit, IconTrash } from '@tabler/icons-react';
+import { IconEdit } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import EditStudentForm from '@/app/components/EditStudentForm';
 import type { IStudent } from '@/types';
@@ -41,8 +40,8 @@ export default function StudentDetailPage({
         }
 
         setStudent(data || null);
-      } catch (error) {
-        console.error('Error loading student:', error);
+      } catch {
+        // Error loading student - handle silently
       } finally {
         setLoading(false);
       }

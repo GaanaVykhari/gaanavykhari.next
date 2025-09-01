@@ -10,7 +10,6 @@ import {
   Button,
   Stack,
   Group,
-  Text,
   MultiSelect,
 } from '@mantine/core';
 import { DateInput, TimeInput } from '@mantine/dates';

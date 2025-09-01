@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import {
   Container,
   Grid,
@@ -10,15 +11,24 @@ import {
   Card,
   Group,
   Badge,
+  Button,
+  Loader,
 } from '@mantine/core';
 import {
   IconUsers,
   IconCreditCard,
   IconSettings,
   IconTrendingUp,
+  IconCalendar,
 } from '@tabler/icons-react';
+import { HolidayModal, HolidayList } from './components/HolidayModal';
+import { IHoliday } from '@/types';
 
 export default function Home() {
+  const [holidays, setHolidays] = useState<IHoliday[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [modalOpened, setModalOpened] = useState(false);
+
   const stats = [
     {
       title: 'Total Students',
@@ -63,6 +73,33 @@ export default function Home() {
       color: 'gray',
     },
   ];
+
+  const fetchHolidays = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/holiday');
+      const data = await response.json();
+      if (data.ok) {
+        setHolidays(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching holidays:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHolidays();
+  }, []);
+
+  const handleHolidayCreated = () => {
+    fetchHolidays();
+  };
+
+  const handleHolidayDeleted = () => {
+    fetchHolidays();
+  };
 
   return (
     <Container size="xl" py="xl">
@@ -140,8 +177,49 @@ export default function Home() {
                 </Grid.Col>
               );
             })}
+            <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+              <Card
+                withBorder
+                padding="lg"
+                radius="md"
+                style={{ cursor: 'pointer' }}
+                onClick={() => setModalOpened(true)}
+              >
+                <Group>
+                  <IconCalendar size={24} color="var(--mantine-color-red-6)" />
+                  <div>
+                    <Text fw={500}>Schedule Holiday</Text>
+                    <Text size="sm" c="dimmed">
+                      Mark days as holidays
+                    </Text>
+                  </div>
+                </Group>
+              </Card>
+            </Grid.Col>
           </Grid>
         </div>
+
+        {/* Upcoming Holidays */}
+        {holidays.length > 0 && (
+          <div>
+            <Title order={2} mb="md">
+              Upcoming Holidays
+            </Title>
+            {loading ? (
+              <Paper p="md" withBorder>
+                <Group justify="center">
+                  <Loader size="sm" />
+                  <Text>Loading holidays...</Text>
+                </Group>
+              </Paper>
+            ) : (
+              <HolidayList
+                holidays={holidays}
+                onHolidayDeleted={handleHolidayDeleted}
+              />
+            )}
+          </div>
+        )}
 
         {/* Recent Activity */}
         <div>
@@ -153,6 +231,12 @@ export default function Home() {
           </Paper>
         </div>
       </Stack>
+
+      <HolidayModal
+        opened={modalOpened}
+        onClose={() => setModalOpened(false)}
+        onHolidayCreated={handleHolidayCreated}
+      />
     </Container>
   );
 }

@@ -44,13 +44,10 @@ async function createClientWithFallback(uri: string): Promise<MongoClient> {
 
   for (let i = 0; i < connectionOptions.length; i++) {
     try {
-      console.log(`Trying MongoDB connection option ${i + 1}`);
       const client = new MongoClient(uri, connectionOptions[i]);
       await client.connect();
-      console.log(`MongoDB connection successful with option ${i + 1}`);
       return client;
     } catch (error) {
-      console.error(`MongoDB connection option ${i + 1} failed:`, error);
       if (i === connectionOptions.length - 1) {
         throw error; // Re-throw if all options fail
       }

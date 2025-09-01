@@ -14,7 +14,7 @@ export async function GET() {
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
-    console.error('Health check failed:', error);
+    // Health check failed - return error response without logging
     return NextResponse.json(
       {
         ok: false,

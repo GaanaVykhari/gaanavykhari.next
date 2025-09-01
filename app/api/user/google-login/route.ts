@@ -3,7 +3,7 @@ import { getDb } from '@/lib/mongo';
 
 export async function POST(request: Request) {
   try {
-    const { email, name } = await request.json();
+    const { email } = await request.json();
 
     if (!email) {
       return NextResponse.json(
@@ -45,8 +45,6 @@ export async function POST(request: Request) {
       },
     });
   } catch (error: any) {
-    console.error('Google login error:', error);
-
     // Return a more specific error message for MongoDB connection issues
     if (
       error.message.includes('MongoDB') ||

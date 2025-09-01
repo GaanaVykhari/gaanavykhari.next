@@ -10,7 +10,6 @@ import {
   Switch,
   TextInput,
   Button,
-  Divider,
 } from '@mantine/core';
 import {
   IconSettings,

@@ -8,6 +8,7 @@ A Next.js application for managing music students, sessions, and payments with G
 - **Student Management**: CRUD operations for student records
 - **Session Tracking**: Track attendance and schedule sessions
 - **Payment Management**: Monitor fees and payment status
+- **Holiday Management**: Schedule holidays and automatically cancel sessions
 - **Responsive Design**: Mobile-first UI with Mantine components
 - **TypeScript**: Full type safety throughout the application
 
@@ -137,6 +138,47 @@ The application includes built-in API routes:
 - `/api/payments/*` - Payment management
 - `/api/holiday/*` - Holiday management
 - `/api/user/*` - User authentication
+
+## Holiday Management
+
+The holiday management system allows administrators to schedule holidays and automatically cancel any sessions that fall within the holiday period.
+
+### Features
+
+- **Date Range Selection**: Choose from and to dates for holiday periods (can be same date for single-day holidays)
+- **Future Date Validation**: Only future dates can be selected
+- **Overlap Prevention**: System prevents overlapping holiday periods
+- **Automatic Session Cancellation**: Any sessions scheduled during holidays are automatically canceled
+- **Holiday List**: View all scheduled holidays on the dashboard
+- **Delete Holidays**: Remove holidays if needed
+
+### Usage
+
+1. **Access**: Click "Schedule Holiday" from the Quick Actions on the dashboard
+2. **Select Dates**: Choose from and to dates (only future dates allowed, can be same date for single-day holidays)
+3. **Add Description**: Optionally add a description for the holiday
+4. **Create**: Click "Create Holiday" to schedule the holiday
+5. **View**: Holidays appear in the "Upcoming Holidays" section
+6. **Delete**: Use the trash icon to delete holidays
+
+### API Endpoints
+
+- `GET /api/holiday` - Retrieve all holidays
+- `POST /api/holiday` - Create a new holiday
+- `DELETE /api/holiday/[id]` - Delete a specific holiday
+
+### Data Structure
+
+```typescript
+interface IHoliday {
+  _id?: string;
+  fromDate: Date;
+  toDate: Date;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
 
 ## Contributing
 

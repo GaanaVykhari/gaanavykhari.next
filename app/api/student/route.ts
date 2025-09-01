@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongo';
-import { ObjectId } from 'mongodb';
 
 export async function POST(request: Request) {
   try {
@@ -23,7 +22,6 @@ export async function POST(request: Request) {
       message: 'Student added successfully',
     });
   } catch (error: any) {
-    console.error('Error adding student:', error);
     return NextResponse.json(
       { ok: false, message: error.message || 'Failed to add student' },
       { status: 500 }

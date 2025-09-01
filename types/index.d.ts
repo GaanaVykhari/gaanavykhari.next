@@ -38,7 +38,11 @@ export interface ISession {
 
 export interface IHoliday {
   _id?: string;
-  date: Date;
+  fromDate: Date;
+  toDate: Date;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface IUser {

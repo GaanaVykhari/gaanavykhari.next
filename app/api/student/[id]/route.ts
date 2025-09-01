@@ -27,7 +27,6 @@ export async function GET(
       data: student,
     });
   } catch (error: any) {
-    console.error('Error fetching student:', error);
     return NextResponse.json(
       { ok: false, message: error.message || 'Failed to fetch student' },
       { status: 500 }
@@ -67,7 +66,6 @@ export async function PATCH(
       message: 'Student updated successfully',
     });
   } catch (error: any) {
-    console.error('Error updating student:', error);
     return NextResponse.json(
       { ok: false, message: error.message || 'Failed to update student' },
       { status: 500 }
@@ -100,7 +98,6 @@ export async function DELETE(
       message: 'Student deleted successfully',
     });
   } catch (error: any) {
-    console.error('Error deleting student:', error);
     return NextResponse.json(
       { ok: false, message: error.message || 'Failed to delete student' },
       { status: 500 }

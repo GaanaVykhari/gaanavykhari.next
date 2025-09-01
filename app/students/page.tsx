@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import {
   Anchor,
   Button,
-  List,
   TextInput,
   Title,
   Container,
@@ -70,8 +69,8 @@ export default function StudentsPage() {
           ? (data?.data?.rows ?? [])
           : [...prev.rows, ...(data?.data?.rows ?? [])],
       }));
-    } catch (error) {
-      console.error('Error loading students:', error);
+    } catch {
+      // Error loading students - handle silently
     } finally {
       setLoading(false);
     }
