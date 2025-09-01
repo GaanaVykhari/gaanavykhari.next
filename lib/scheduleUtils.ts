@@ -7,6 +7,9 @@
 export function formatTime(time: string): string {
   try {
     const [hours, minutes] = time.split(':');
+    if (!hours || !minutes) {
+      return time;
+    }
     const date = new Date();
     date.setHours(parseInt(hours), parseInt(minutes));
     return date.toLocaleTimeString('en-US', {

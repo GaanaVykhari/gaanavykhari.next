@@ -26,7 +26,8 @@ import {
   IconX,
 } from '@tabler/icons-react';
 
-import { formatTime, formatDate, ScheduleEntry } from '@/lib/scheduleUtils';
+import { formatTime, formatDate } from '@/lib/scheduleUtils';
+import { ScheduleEntry } from '@/types';
 
 export default function SchedulePage() {
   const [todaysSchedule, setTodaysSchedule] = useState<ScheduleEntry[]>([]);

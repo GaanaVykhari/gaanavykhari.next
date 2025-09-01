@@ -10,7 +10,7 @@ export async function GET() {
     return NextResponse.json({
       ok: true,
       mongodb: 'connected',
-      collections: collections.map(c => c.name),
+      collections: collections.map((c: any) => c.name),
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
