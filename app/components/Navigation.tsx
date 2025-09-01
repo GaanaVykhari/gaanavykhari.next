@@ -20,6 +20,7 @@ import {
   IconSettings,
   IconDashboard,
   IconLogout,
+  IconCalendarEvent,
 } from '@tabler/icons-react';
 import { signOut, useSession } from 'next-auth/react';
 import { useState } from 'react';
@@ -27,6 +28,7 @@ import Loader from './Loader';
 
 const navigationItems = [
   { label: 'Dashboard', href: '/', icon: IconDashboard },
+  { label: 'Schedule', href: '/schedule', icon: IconCalendarEvent },
   { label: 'Students', href: '/students', icon: IconUsers },
   { label: 'Payments', href: '/payments', icon: IconCreditCard },
   { label: 'Settings', href: '/settings', icon: IconSettings },

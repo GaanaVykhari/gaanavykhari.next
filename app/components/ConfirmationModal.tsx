@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Modal, Text, Group, Button, Stack } from '@mantine/core';
 import { IconAlertTriangle } from '@tabler/icons-react';
 

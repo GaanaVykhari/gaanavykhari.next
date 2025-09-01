@@ -20,14 +20,22 @@ import {
   IconSettings,
   IconTrendingUp,
   IconCalendar,
+  IconClock,
+  IconArrowRight,
 } from '@tabler/icons-react';
 import { HolidayModal, HolidayList } from './components/HolidayModal';
 import { IHoliday } from '@/types';
+import { formatTime, getRelativeDateString } from '@/lib/scheduleUtils';
+import { UpcomingSession } from '@/types';
 
 export default function Home() {
   const [holidays, setHolidays] = useState<IHoliday[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalOpened, setModalOpened] = useState(false);
+  const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>(
+    []
+  );
+  const [studentsLoading, setStudentsLoading] = useState(false);
 
   const stats = [
     {
@@ -82,15 +90,46 @@ export default function Home() {
       if (data.ok) {
         setHolidays(data.data);
       }
-    } catch (error) {
-      console.error('Error fetching holidays:', error);
+    } catch {
+      // Silently handle error - could be logged to error reporting service in production
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchUpcomingSessions = async () => {
+    setStudentsLoading(true);
+    try {
+      const response = await fetch('/api/schedule/upcoming?limit=5', {
+        cache: 'no-store',
+      });
+      const data = await response.json();
+
+      if (data.ok && data.data) {
+        // Convert date strings back to Date objects
+        const sessionsWithDates = data.data.map((session: any) => ({
+          ...session,
+          date: new Date(session.date),
+          student: {
+            ...session.student,
+            inductionDate: new Date(session.student.inductionDate),
+            lastClassDate: session.student.lastClassDate
+              ? new Date(session.student.lastClassDate)
+              : null,
+          },
+        }));
+        setUpcomingSessions(sessionsWithDates);
+      }
+    } catch {
+      // Silently handle error - could be logged to error reporting service in production
+    } finally {
+      setStudentsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchHolidays();
+    fetchUpcomingSessions();
   }, []);
 
   const handleHolidayCreated = () => {
@@ -102,7 +141,7 @@ export default function Home() {
   };
 
   return (
-    <Container size="xl" py="xl">
+    <Container size="xl" pt="xl" pb={{ base: '6rem', sm: 'xl' }}>
       <Stack gap="xl">
         <div>
           <Title order={1} mb="xs">
@@ -199,6 +238,88 @@ export default function Home() {
           </Grid>
         </div>
 
+        {/* Upcoming Sessions */}
+        <div>
+          <Group justify="space-between" align="flex-end" mb="md">
+            <Title order={2}>Upcoming Sessions</Title>
+            <Button
+              variant="subtle"
+              rightSection={<IconArrowRight size={16} />}
+              onClick={() => (window.location.href = '/schedule')}
+            >
+              View Full Schedule
+            </Button>
+          </Group>
+
+          {studentsLoading ? (
+            <Paper p="md" withBorder>
+              <Group justify="center">
+                <Loader size="sm" />
+                <Text>Loading upcoming sessions...</Text>
+              </Group>
+            </Paper>
+          ) : upcomingSessions.length === 0 ? (
+            <Paper p="xl" withBorder>
+              <Stack align="center" gap="md">
+                <IconClock size={48} color="var(--mantine-color-gray-5)" />
+                <div style={{ textAlign: 'center' }}>
+                  <Text fw={500} mb="xs">
+                    No upcoming sessions
+                  </Text>
+                  <Text c="dimmed" size="sm">
+                    Add students to see their scheduled sessions here.
+                  </Text>
+                </div>
+              </Stack>
+            </Paper>
+          ) : (
+            <Stack gap="md">
+              {upcomingSessions.map((session, index) => (
+                <Card
+                  key={`${session.student._id}-${index}`}
+                  withBorder
+                  padding="md"
+                >
+                  <Group justify="space-between" align="center">
+                    <div style={{ flex: 1 }}>
+                      <Group gap="md" mb="xs">
+                        <Text fw={500} size="lg">
+                          {session.student.name}
+                        </Text>
+                        <Badge variant="light" color="blue">
+                          {getRelativeDateString(session.date)}
+                        </Badge>
+                      </Group>
+                      <Group gap="md" c="dimmed">
+                        <Group gap={4}>
+                          <IconClock size={14} />
+                          <Text size="sm">{formatTime(session.time)}</Text>
+                        </Group>
+                        <Text size="sm">
+                          {session.date.toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </Text>
+                      </Group>
+                    </div>
+                    <Button
+                      variant="light"
+                      size="sm"
+                      onClick={() =>
+                        (window.location.href = `/students/${session.student._id}`)
+                      }
+                    >
+                      View Details
+                    </Button>
+                  </Group>
+                </Card>
+              ))}
+            </Stack>
+          )}
+        </div>
+
         {/* Upcoming Holidays */}
         {holidays.length > 0 && (
           <div>
@@ -220,16 +341,6 @@ export default function Home() {
             )}
           </div>
         )}
-
-        {/* Recent Activity */}
-        <div>
-          <Title order={2} mb="md">
-            Recent Activity
-          </Title>
-          <Paper p="md" withBorder>
-            <Text c="dimmed">No recent activity to display</Text>
-          </Paper>
-        </div>
       </Stack>
 
       <HolidayModal

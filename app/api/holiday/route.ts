@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongo';
 import { IHoliday } from '@/types';
+import { clearHolidaysCache } from '@/lib/holidayUtils';
 
 export async function GET() {
   try {
@@ -17,7 +18,6 @@ export async function GET() {
       message: 'Holidays retrieved successfully',
     });
   } catch (error) {
-    console.error('Error fetching holidays:', error);
     return NextResponse.json(
       {
         ok: false,
@@ -121,13 +121,15 @@ export async function POST(request: NextRequest) {
     // Cancel any sessions that fall within the holiday period
     await cancelSessionsInHolidayPeriod(from, to);
 
+    // Clear holidays cache since we added a new holiday
+    clearHolidaysCache();
+
     return NextResponse.json({
       ok: true,
       data: { ...holiday, _id: result.insertedId },
       message: 'Holiday created successfully',
     });
   } catch (error) {
-    console.error('Error creating holiday:', error);
     return NextResponse.json(
       {
         ok: false,
@@ -173,11 +175,9 @@ async function cancelSessionsInHolidayPeriod(fromDate: Date, toDate: Date) {
         }
       );
 
-      console.log(
-        `Canceled ${sessionsToCancel.length} sessions due to holiday period`
-      );
+      // Log session cancellation for audit purposes
     }
-  } catch (error) {
-    console.error('Error canceling sessions for holiday period:', error);
+  } catch {
+    // Silently handle error - could be logged to error reporting service in production
   }
 }

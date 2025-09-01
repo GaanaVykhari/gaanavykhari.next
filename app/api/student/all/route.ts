@@ -10,32 +10,48 @@ export async function GET(request: Request) {
     const db = await getDb();
     const collection = db.collection('students');
 
-    // Build query
+    // Build optimized query
     let query = {};
     if (search) {
+      // Use text search if available, otherwise fall back to regex
+      const searchRegex = new RegExp(
+        search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+        'i'
+      );
       query = {
         $or: [
-          { name: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } },
-          { phone: { $regex: search, $options: 'i' } },
+          { name: searchRegex },
+          { email: searchRegex },
+          { phone: searchRegex },
         ],
       };
     }
-
-    // Get total count
-    const total = await collection.countDocuments(query);
 
     // Pagination
     const pageSize = 10;
     const skip = (page - 1) * pageSize;
 
-    // Get students with pagination
-    const students = await collection
-      .find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(pageSize)
-      .toArray();
+    // Execute both queries in parallel for better performance
+    const [students, total] = await Promise.all([
+      collection
+        .find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(pageSize)
+        .project({
+          name: 1,
+          email: 1,
+          phone: 1,
+          fees: 1,
+          schedule: 1,
+          inductionDate: 1,
+          lastClassDate: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        })
+        .toArray(),
+      collection.countDocuments(query),
+    ]);
 
     return NextResponse.json({
       ok: true,

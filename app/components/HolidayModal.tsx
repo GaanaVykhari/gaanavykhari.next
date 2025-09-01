@@ -5,12 +5,10 @@ import {
   Modal,
   Button,
   Group,
-  TextInput,
   Textarea,
   Stack,
   Text,
   Alert,
-  Loader,
   Paper,
   Badge,
   ActionIcon,
@@ -88,7 +86,7 @@ export function HolidayModal({
           color: 'red',
         });
       }
-    } catch (error) {
+    } catch {
       notifications.show({
         title: 'Error',
         message: 'Failed to create holiday',
@@ -191,7 +189,9 @@ export function HolidayList({ holidays, onHolidayDeleted }: HolidayListProps) {
   };
 
   const confirmDelete = async () => {
-    if (!holidayToDelete) return;
+    if (!holidayToDelete) {
+      return;
+    }
 
     setDeletingId(holidayToDelete);
     try {
@@ -215,7 +215,7 @@ export function HolidayList({ holidays, onHolidayDeleted }: HolidayListProps) {
           color: 'red',
         });
       }
-    } catch (error) {
+    } catch {
       notifications.show({
         title: 'Error',
         message: 'Failed to delete holiday',

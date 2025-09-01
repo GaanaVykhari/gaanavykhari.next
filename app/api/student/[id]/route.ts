@@ -8,12 +8,34 @@ export async function GET(
 ) {
   try {
     const resolvedParams = await params;
+
+    // Validate ObjectId format
+    if (!ObjectId.isValid(resolvedParams.id)) {
+      return NextResponse.json(
+        { ok: false, message: 'Invalid student ID format' },
+        { status: 400 }
+      );
+    }
+
     const db = await getDb();
     const collection = db.collection('students');
 
-    const student = await collection.findOne({
-      _id: new ObjectId(resolvedParams.id),
-    });
+    const student = await collection.findOne(
+      { _id: new ObjectId(resolvedParams.id) },
+      {
+        projection: {
+          name: 1,
+          email: 1,
+          phone: 1,
+          fees: 1,
+          schedule: 1,
+          inductionDate: 1,
+          lastClassDate: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      }
+    );
 
     if (!student) {
       return NextResponse.json(
@@ -41,6 +63,15 @@ export async function PATCH(
   try {
     const body = await request.json();
     const resolvedParams = await params;
+
+    // Validate ObjectId format
+    if (!ObjectId.isValid(resolvedParams.id)) {
+      return NextResponse.json(
+        { ok: false, message: 'Invalid student ID format' },
+        { status: 400 }
+      );
+    }
+
     const db = await getDb();
     const collection = db.collection('students');
 
@@ -79,6 +110,15 @@ export async function DELETE(
 ) {
   try {
     const resolvedParams = await params;
+
+    // Validate ObjectId format
+    if (!ObjectId.isValid(resolvedParams.id)) {
+      return NextResponse.json(
+        { ok: false, message: 'Invalid student ID format' },
+        { status: 400 }
+      );
+    }
+
     const db = await getDb();
     const collection = db.collection('students');
 

@@ -1,87 +1,49 @@
-import { MongoClient, Db } from 'mongodb';
+import { MongoClient } from 'mongodb';
 
-let client: MongoClient | undefined;
 let clientPromise: Promise<MongoClient> | undefined;
 
-async function createClientWithFallback(uri: string): Promise<MongoClient> {
-  const connectionOptions = [
-    // Option 1: Standard SSL with validation
-    {
-      maxPoolSize: 5,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 10000,
-      ssl: true,
-      tls: true,
-      retryWrites: true,
-      retryReads: true,
-    },
-    // Option 2: SSL with invalid certificates allowed
-    {
-      maxPoolSize: 5,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 10000,
-      ssl: true,
-      tls: true,
-      tlsAllowInvalidCertificates: true,
-      tlsAllowInvalidHostnames: true,
-      retryWrites: true,
-      retryReads: true,
-    },
-    // Option 3: No SSL/TLS (fallback)
-    {
-      maxPoolSize: 5,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 10000,
-      ssl: false,
-      tls: false,
-      retryWrites: true,
-      retryReads: true,
-    },
-  ];
-
-  for (let i = 0; i < connectionOptions.length; i++) {
-    try {
-      const client = new MongoClient(uri, connectionOptions[i]);
-      await client.connect();
-      return client;
-    } catch (error) {
-      if (i === connectionOptions.length - 1) {
-        throw error; // Re-throw if all options fail
-      }
-    }
-  }
-
-  throw new Error('All MongoDB connection options failed');
-}
-
 export function getMongoClient(): Promise<MongoClient> {
-  if (!client) {
-    const uri = process.env.MONGODB_URI;
-    if (!uri) {
-      throw new Error('Missing MONGODB_URI');
-    }
-
-    // Use fallback connection strategy
-    client = new MongoClient(uri, {
-      maxPoolSize: 5,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 10000,
-      ssl: true,
-      tls: true,
-      retryWrites: true,
-      retryReads: true,
-    });
-  }
   if (!clientPromise) {
     const uri = process.env.MONGODB_URI;
     if (!uri) {
       throw new Error('Missing MONGODB_URI');
     }
-    clientPromise = createClientWithFallback(uri);
+
+    // Optimized connection options for better performance
+    const connectionOptions = {
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 2000, // Very fast timeout
+      socketTimeoutMS: 3000,
+      connectTimeoutMS: 2000,
+      ssl: true,
+      tls: true,
+      retryWrites: true,
+      retryReads: true,
+      maxIdleTimeMS: 60000, // Keep connections alive for 1 minute
+      heartbeatFrequencyMS: 10000, // Check connection health every 10 seconds
+    };
+
+    clientPromise = new Promise(async (resolve, reject) => {
+      try {
+        const client = new MongoClient(uri, connectionOptions);
+        await client.connect();
+        resolve(client);
+      } catch {
+        // If SSL fails, try without SSL
+        try {
+          const fallbackOptions = {
+            ...connectionOptions,
+            ssl: false,
+            tls: false,
+          };
+          const client = new MongoClient(uri, fallbackOptions);
+          await client.connect();
+          resolve(client);
+        } catch (fallbackError) {
+          reject(fallbackError);
+        }
+      }
+    });
   }
   return clientPromise;
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongo';
 import { ObjectId } from 'mongodb';
+import { clearHolidaysCache } from '@/lib/holidayUtils';
 
 export async function DELETE(
   request: NextRequest,
@@ -34,12 +35,14 @@ export async function DELETE(
       );
     }
 
+    // Clear holidays cache since we deleted a holiday
+    clearHolidaysCache();
+
     return NextResponse.json({
       ok: true,
       message: 'Holiday deleted successfully',
     });
   } catch (error) {
-    console.error('Error deleting holiday:', error);
     return NextResponse.json(
       {
         ok: false,

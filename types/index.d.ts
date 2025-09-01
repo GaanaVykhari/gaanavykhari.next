@@ -98,3 +98,52 @@ declare module 'next-auth/jwt' {
     backendToken?: string;
   }
 }
+
+// Schedule-related types
+export interface ScheduleEntry {
+  student: {
+    _id?: string;
+    name: string;
+    phone: string;
+    email: string;
+    fees: {
+      perClasses: number;
+      amount: number;
+    };
+    schedule: {
+      frequency: 'monthly' | 'weekly' | 'fortnightly' | 'daily';
+      daysOfTheWeek: number[];
+      daysOfTheMonth: number[];
+      time: string;
+    };
+    inductionDate: Date;
+    lastClassDate: Date | null;
+  };
+  time: string;
+  status: 'scheduled' | 'attended' | 'canceled' | 'missed';
+  sessionId?: string;
+}
+
+export interface UpcomingSession {
+  student: {
+    _id?: string;
+    name: string;
+    phone: string;
+    email: string;
+    fees: {
+      perClasses: number;
+      amount: number;
+    };
+    schedule: {
+      frequency: 'monthly' | 'weekly' | 'fortnightly' | 'daily';
+      daysOfTheWeek: number[];
+      daysOfTheMonth: number[];
+      time: string;
+    };
+    inductionDate: Date;
+    lastClassDate: Date | null;
+  };
+  date: Date;
+  time: string;
+  daysFromNow: number;
+}
