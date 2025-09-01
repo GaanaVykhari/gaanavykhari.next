@@ -14,7 +14,6 @@ import {
   Alert,
   Button,
   ActionIcon,
-  Divider,
 } from '@mantine/core';
 import {
   IconCalendarEvent,
@@ -87,15 +86,26 @@ export default function SchedulePage() {
     sessionEntry: ScheduleEntry,
     newStatus: 'attended' | 'canceled' | 'missed'
   ) => {
-    // This would update the session status in the backend
-    // For now, we'll just update the local state
-    setTodaysSchedule(prev =>
-      prev.map(entry =>
-        entry.student._id === sessionEntry.student._id
-          ? { ...entry, status: newStatus }
-          : entry
-      )
-    );
+    try {
+      const response = await fetch(`/api/sessions/${sessionEntry.sessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        // Update local state
+        setTodaysSchedule(prev =>
+          prev.map(entry =>
+            entry.student._id === sessionEntry.student._id
+              ? { ...entry, status: newStatus }
+              : entry
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Failed to update session status:', error);
+    }
   };
 
   const getStatusColor = (status: string) => {

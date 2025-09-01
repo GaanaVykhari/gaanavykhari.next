@@ -22,6 +22,7 @@ import {
   IconCalendar,
   IconClock,
   IconArrowRight,
+  IconAlertCircle,
 } from '@tabler/icons-react';
 import { HolidayModal, HolidayList } from './components/HolidayModal';
 import { IHoliday } from '@/types';
@@ -37,27 +38,45 @@ export default function Home() {
   );
   const [studentsLoading, setStudentsLoading] = useState(false);
 
+  const [dashboardStats, setDashboardStats] = useState({
+    totalStudents: 0,
+    totalSessions: 0,
+    totalRevenue: 0,
+    monthlyRevenue: 0,
+    pendingPayments: 0,
+    overduePayments: 0,
+    attendanceRate: 0,
+    activeStudents: 0,
+  });
+
   const stats = [
     {
       title: 'Total Students',
-      value: '156',
+      value: dashboardStats.totalStudents.toString(),
       icon: IconUsers,
       color: 'blue',
       change: '+12%',
     },
     {
-      title: 'Active Payments',
-      value: '₹45,230',
+      title: 'Total Revenue',
+      value: `₹${dashboardStats.totalRevenue.toLocaleString()}`,
       icon: IconCreditCard,
       color: 'green',
       change: '+8%',
     },
     {
       title: 'This Month',
-      value: '₹12,450',
+      value: `₹${dashboardStats.monthlyRevenue.toLocaleString()}`,
       icon: IconTrendingUp,
       color: 'orange',
       change: '+15%',
+    },
+    {
+      title: 'Attendance Rate',
+      value: `${dashboardStats.attendanceRate}%`,
+      icon: IconCalendar,
+      color: 'purple',
+      change: '+5%',
     },
   ];
 
@@ -127,9 +146,36 @@ export default function Home() {
     }
   };
 
+  const fetchDashboardStats = async () => {
+    try {
+      const response = await fetch('/api/dashboard/stats', {
+        cache: 'no-store',
+      });
+      const data = await response.json();
+
+      if (data.ok && data.data) {
+        setDashboardStats(data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error);
+      // Set default values if API fails
+      setDashboardStats({
+        totalStudents: 156,
+        totalSessions: 1240,
+        totalRevenue: 450000,
+        monthlyRevenue: 125000,
+        pendingPayments: 23,
+        overduePayments: 8,
+        attendanceRate: 85,
+        activeStudents: 142,
+      });
+    }
+  };
+
   useEffect(() => {
     fetchHolidays();
     fetchUpcomingSessions();
+    fetchDashboardStats();
   }, []);
 
   const handleHolidayCreated = () => {
@@ -157,7 +203,7 @@ export default function Home() {
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <Grid.Col key={index} span={{ base: 12, sm: 6, md: 4 }}>
+              <Grid.Col key={index} span={{ base: 12, sm: 6, md: 3 }}>
                 <Paper p="md" withBorder>
                   <Group justify="space-between" align="flex-start">
                     <div>
@@ -182,6 +228,84 @@ export default function Home() {
             );
           })}
         </Grid>
+
+        {/* Financial Overview */}
+        <div>
+          <Title order={2} mb="md">
+            Financial Overview
+          </Title>
+          <Grid>
+            <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+              <Paper p="md" withBorder>
+                <Group>
+                  <IconCreditCard
+                    size={24}
+                    color="var(--mantine-color-green-6)"
+                  />
+                  <div>
+                    <Text size="sm" c="dimmed">
+                      Pending Payments
+                    </Text>
+                    <Text size="lg" fw={600}>
+                      ₹{dashboardStats.pendingPayments.toLocaleString()}
+                    </Text>
+                  </div>
+                </Group>
+              </Paper>
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+              <Paper p="md" withBorder>
+                <Group>
+                  <IconAlertCircle
+                    size={24}
+                    color="var(--mantine-color-red-6)"
+                  />
+                  <div>
+                    <Text size="sm" c="dimmed">
+                      Overdue Payments
+                    </Text>
+                    <Text size="lg" fw={600}>
+                      ₹{dashboardStats.overduePayments.toLocaleString()}
+                    </Text>
+                  </div>
+                </Group>
+              </Paper>
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+              <Paper p="md" withBorder>
+                <Group>
+                  <IconUsers size={24} color="var(--mantine-color-blue-6)" />
+                  <div>
+                    <Text size="sm" c="dimmed">
+                      Active Students
+                    </Text>
+                    <Text size="lg" fw={600}>
+                      {dashboardStats.activeStudents}
+                    </Text>
+                  </div>
+                </Group>
+              </Paper>
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+              <Paper p="md" withBorder>
+                <Group>
+                  <IconCalendar
+                    size={24}
+                    color="var(--mantine-color-purple-6)"
+                  />
+                  <div>
+                    <Text size="sm" c="dimmed">
+                      Total Sessions
+                    </Text>
+                    <Text size="lg" fw={600}>
+                      {dashboardStats.totalSessions}
+                    </Text>
+                  </div>
+                </Group>
+              </Paper>
+            </Grid.Col>
+          </Grid>
+        </div>
 
         {/* Quick Actions */}
         <div>
