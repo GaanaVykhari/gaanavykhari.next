@@ -15,10 +15,23 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { IconCalendar, IconPlus, IconTrash } from '@tabler/icons-react';
+import {
+  IconCalendar,
+  IconPlus,
+  IconTrash,
+  IconCheck,
+  IconBrandWhatsapp,
+} from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { IHoliday } from '@/types';
 import { ConfirmationModal } from './ConfirmationModal';
+import { sendHolidayMessage } from '@/lib/whatsapp';
+
+interface AffectedStudent {
+  name: string;
+  phone: string;
+  dates: string[];
+}
 
 interface HolidayModalProps {
   opened: boolean;
@@ -35,6 +48,11 @@ export function HolidayModal({
   const [toDate, setToDate] = useState<Date | null>(null);
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<'form' | 'broadcast'>('form');
+  const [affectedStudents, setAffectedStudents] = useState<AffectedStudent[]>(
+    []
+  );
+  const [sentStudents, setSentStudents] = useState<Set<string>>(new Set());
 
   const handleSubmit = async () => {
     if (!fromDate || !toDate) {
@@ -77,8 +95,15 @@ export function HolidayModal({
           message: 'Holiday created successfully',
           color: 'green',
         });
-        onHolidayCreated();
-        handleClose();
+
+        const students: AffectedStudent[] = data.data?.affectedStudents || [];
+        if (students.length > 0) {
+          setAffectedStudents(students);
+          setStep('broadcast');
+        } else {
+          onHolidayCreated();
+          handleClose();
+        }
       } else {
         notifications.show({
           title: 'Error',
@@ -97,11 +122,33 @@ export function HolidayModal({
     }
   };
 
+  const handleSendMessage = (student: AffectedStudent) => {
+    if (!fromDate || !toDate) {
+      return;
+    }
+    sendHolidayMessage(
+      student.phone,
+      student.name,
+      fromDate,
+      toDate,
+      description || undefined
+    );
+    setSentStudents(prev => new Set([...prev, student.phone]));
+  };
+
+  const handleDone = () => {
+    onHolidayCreated();
+    handleClose();
+  };
+
   const handleClose = () => {
     setFromDate(null);
     setToDate(null);
     setDescription('');
     setLoading(false);
+    setStep('form');
+    setAffectedStudents([]);
+    setSentStudents(new Set());
     onClose();
   };
 
@@ -114,61 +161,110 @@ export function HolidayModal({
   return (
     <Modal
       opened={opened}
-      onClose={handleClose}
-      title="Schedule Holiday"
+      onClose={step === 'broadcast' ? handleDone : handleClose}
+      title={step === 'form' ? 'Schedule Holiday' : 'Notify Students'}
       size="md"
       centered
     >
-      <Stack gap="md">
-        <Alert color="blue" variant="light">
-          <Text size="sm">
-            Select a date range for the holiday. You can select the same date
-            for both from and to dates for a single-day holiday. Any scheduled
-            sessions during this period will be automatically canceled.
-          </Text>
-        </Alert>
+      {step === 'form' ? (
+        <Stack gap="md">
+          <Alert color="blue" variant="light">
+            <Text size="sm">
+              Select a date range for the holiday. You can select the same date
+              for both from and to dates for a single-day holiday. Any scheduled
+              sessions during this period will be automatically canceled.
+            </Text>
+          </Alert>
 
-        <DateInput
-          label="From Date"
-          placeholder="Select start date"
-          value={fromDate}
-          onChange={value => setFromDate(value ? new Date(value) : null)}
-          minDate={getMinDate()}
-          leftSection={<IconCalendar size={16} />}
-          required
-        />
+          <DateInput
+            label="From Date"
+            placeholder="Select start date"
+            value={fromDate}
+            onChange={value => setFromDate(value ? new Date(value) : null)}
+            minDate={getMinDate()}
+            leftSection={<IconCalendar size={16} />}
+            required
+          />
 
-        <DateInput
-          label="To Date"
-          placeholder="Select end date"
-          value={toDate}
-          onChange={value => setToDate(value ? new Date(value) : null)}
-          minDate={fromDate || getMinDate()}
-          leftSection={<IconCalendar size={16} />}
-          required
-        />
+          <DateInput
+            label="To Date"
+            placeholder="Select end date"
+            value={toDate}
+            onChange={value => setToDate(value ? new Date(value) : null)}
+            minDate={fromDate || getMinDate()}
+            leftSection={<IconCalendar size={16} />}
+            required
+          />
 
-        <Textarea
-          label="Description (Optional)"
-          placeholder="Enter holiday description..."
-          value={description}
-          onChange={e => setDescription(e.currentTarget.value)}
-          rows={3}
-        />
+          <Textarea
+            label="Description (Optional)"
+            placeholder="Enter holiday description..."
+            value={description}
+            onChange={e => setDescription(e.currentTarget.value)}
+            rows={3}
+          />
 
-        <Group justify="flex-end" mt="md">
-          <Button variant="light" onClick={handleClose} disabled={loading}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            loading={loading}
-            leftSection={<IconPlus size={16} />}
-          >
-            Create Holiday
-          </Button>
-        </Group>
-      </Stack>
+          <Group justify="flex-end" mt="md">
+            <Button variant="light" onClick={handleClose} disabled={loading}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              loading={loading}
+              leftSection={<IconPlus size={16} />}
+            >
+              Create Holiday
+            </Button>
+          </Group>
+        </Stack>
+      ) : (
+        <Stack gap="md">
+          <Alert color="blue" variant="light">
+            <Text size="sm">
+              {affectedStudents.length} student
+              {affectedStudents.length !== 1 ? 's have' : ' has'} sessions
+              canceled. Send them a WhatsApp notification.
+            </Text>
+          </Alert>
+
+          {affectedStudents.map(student => (
+            <Paper key={student.phone} p="sm" withBorder>
+              <Group justify="space-between">
+                <div>
+                  <Text fw={500}>{student.name}</Text>
+                  <Text size="xs" c="dimmed">
+                    {student.dates.length} session
+                    {student.dates.length !== 1 ? 's' : ''} canceled
+                  </Text>
+                </div>
+                {sentStudents.has(student.phone) ? (
+                  <Badge
+                    color="green"
+                    variant="light"
+                    leftSection={<IconCheck size={14} />}
+                  >
+                    Sent
+                  </Badge>
+                ) : (
+                  <Button
+                    size="xs"
+                    variant="light"
+                    color="green"
+                    leftSection={<IconBrandWhatsapp size={16} />}
+                    onClick={() => handleSendMessage(student)}
+                  >
+                    Send
+                  </Button>
+                )}
+              </Group>
+            </Paper>
+          ))}
+
+          <Group justify="flex-end" mt="md">
+            <Button onClick={handleDone}>Done</Button>
+          </Group>
+        </Stack>
+      )}
     </Modal>
   );
 }

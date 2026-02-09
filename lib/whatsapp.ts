@@ -46,3 +46,28 @@ This is to inform you that your music class scheduled for ${formatShortDate(orig
 
   openWhatsApp(phone, message);
 }
+
+export function sendHolidayMessage(
+  phone: string,
+  name: string,
+  fromDate: Date,
+  toDate: Date,
+  description?: string
+) {
+  const reason = description || 'a holiday';
+  const from = new Date(fromDate);
+  const to = new Date(toDate);
+  const isSingleDay = from.toDateString() === to.toDateString();
+
+  const dateText = isSingleDay
+    ? `on ${formatShortDate(from)}`
+    : `from ${formatShortDate(from)} to ${formatShortDate(to)}`;
+
+  const message = `Hi ${name},
+
+This is to inform you that classes are cancelled ${dateText} due to ${reason}.
+
+- GaanaVykhari`;
+
+  openWhatsApp(phone, message);
+}
