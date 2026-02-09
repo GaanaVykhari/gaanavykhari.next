@@ -33,7 +33,12 @@ export interface ISession {
   _id?: string;
   student: string;
   date: Date;
+  time?: string;
   status: ISessionStatus;
+  notes?: string;
+  attendedAt?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface IHoliday {
@@ -122,6 +127,7 @@ export interface ScheduleEntry {
   time: string;
   status: 'scheduled' | 'attended' | 'canceled' | 'missed';
   sessionId?: string;
+  isAdhoc?: boolean;
 }
 
 export interface UpcomingSession {
@@ -146,4 +152,5 @@ export interface UpcomingSession {
   date: Date;
   time: string;
   daysFromNow: number;
+  isAdhoc?: boolean;
 }

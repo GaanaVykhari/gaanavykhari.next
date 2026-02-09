@@ -6,6 +6,7 @@ export interface ScheduleEntry {
   time: string;
   status: 'scheduled' | 'attended' | 'canceled' | 'missed';
   sessionId?: string;
+  isAdhoc?: boolean;
 }
 
 export interface UpcomingSession {
@@ -13,6 +14,7 @@ export interface UpcomingSession {
   date: Date;
   time: string;
   daysFromNow: number;
+  isAdhoc?: boolean;
 }
 
 /**

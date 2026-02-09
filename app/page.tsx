@@ -25,6 +25,7 @@ import {
   IconAlertCircle,
 } from '@tabler/icons-react';
 import { HolidayModal, HolidayList } from './components/HolidayModal';
+import { CancelRescheduleModal } from './components/CancelRescheduleModal';
 import { IHoliday } from '@/types';
 import { formatTime, getRelativeDateString } from '@/lib/scheduleUtils';
 import { UpcomingSession } from '@/types';
@@ -37,6 +38,16 @@ export default function Home() {
     []
   );
   const [studentsLoading, setStudentsLoading] = useState(false);
+
+  // Cancel/Reschedule modal state
+  const [cancelModalOpened, setCancelModalOpened] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState<{
+    studentName: string;
+    studentPhone: string;
+    studentId: string;
+    date: string;
+    time: string;
+  } | null>(null);
 
   const [dashboardStats, setDashboardStats] = useState({
     totalStudents: 0,
@@ -184,6 +195,19 @@ export default function Home() {
 
   const handleHolidayDeleted = () => {
     fetchHolidays();
+  };
+
+  const handleCancelSession = (session: UpcomingSession) => {
+    const d = new Date(session.date);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    setCancelTarget({
+      studentName: session.student.name,
+      studentPhone: session.student.phone,
+      studentId: String(session.student._id),
+      date: dateStr,
+      time: session.time,
+    });
+    setCancelModalOpened(true);
   };
 
   return (
@@ -413,6 +437,11 @@ export default function Home() {
                         <Badge variant="light" color="blue">
                           {getRelativeDateString(session.date)}
                         </Badge>
+                        {(session as any).isAdhoc && (
+                          <Badge variant="light" color="grape" size="sm">
+                            Adhoc
+                          </Badge>
+                        )}
                       </Group>
                       <Group gap="md" c="dimmed">
                         <Group gap={4}>
@@ -428,15 +457,25 @@ export default function Home() {
                         </Text>
                       </Group>
                     </div>
-                    <Button
-                      variant="light"
-                      size="sm"
-                      onClick={() =>
-                        (window.location.href = `/students/${session.student._id}`)
-                      }
-                    >
-                      View Details
-                    </Button>
+                    <Group gap="xs">
+                      <Button
+                        variant="light"
+                        size="sm"
+                        color="red"
+                        onClick={() => handleCancelSession(session)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="light"
+                        size="sm"
+                        onClick={() =>
+                          (window.location.href = `/students/${session.student._id}`)
+                        }
+                      >
+                        View Details
+                      </Button>
+                    </Group>
                   </Group>
                 </Card>
               ))}
@@ -472,6 +511,25 @@ export default function Home() {
         onClose={() => setModalOpened(false)}
         onHolidayCreated={handleHolidayCreated}
       />
+
+      {cancelTarget && (
+        <CancelRescheduleModal
+          opened={cancelModalOpened}
+          onClose={() => {
+            setCancelModalOpened(false);
+            setCancelTarget(null);
+          }}
+          studentName={cancelTarget.studentName}
+          studentPhone={cancelTarget.studentPhone}
+          studentId={cancelTarget.studentId}
+          date={cancelTarget.date}
+          time={cancelTarget.time}
+          onCompleted={() => {
+            fetchUpcomingSessions();
+            fetchDashboardStats();
+          }}
+        />
+      )}
     </Container>
   );
 }

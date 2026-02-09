@@ -10,11 +10,11 @@ import {
   Select,
   TextInput,
   Badge,
-  Alert,
   Card,
   ActionIcon,
   Divider,
   Loader,
+  Menu,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -27,8 +27,10 @@ import {
   IconAlertCircle,
   IconCheck,
   IconX,
+  IconArrowsShuffle,
 } from '@tabler/icons-react';
 import { format } from 'date-fns';
+import { CancelRescheduleModal } from './CancelRescheduleModal';
 
 interface Session {
   _id: string;
@@ -76,6 +78,17 @@ export default function SessionManager({
     useDisclosure(false);
   const [viewModalOpened, { open: openViewModal, close: closeViewModal }] =
     useDisclosure(false);
+
+  // Cancel/Reschedule modal state
+  const [cancelModalOpened, setCancelModalOpened] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState<{
+    studentName: string;
+    studentPhone: string;
+    studentId: string;
+    date: string;
+    time: string;
+    sessionId?: string;
+  } | null>(null);
 
   const [formData, setFormData] = useState<SessionFormData>({
     studentId: studentId || '',
@@ -184,6 +197,26 @@ export default function SessionManager({
     }
   };
 
+  // Open cancel/reschedule modal
+  const handleCancelClick = (session: Session) => {
+    const d = new Date(session.date);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    setCancelTarget({
+      studentName: session.student.name,
+      studentPhone: session.student.phone,
+      studentId: session.student._id,
+      date: dateStr,
+      time: session.time,
+      sessionId: session._id,
+    });
+    setCancelModalOpened(true);
+  };
+
+  const handleCancelCompleted = () => {
+    loadSessions();
+    onSessionUpdated?.();
+  };
+
   // Handle delete session
   const handleDelete = async (sessionId: string) => {
     if (confirm('Are you sure you want to delete this session?')) {
@@ -263,6 +296,8 @@ export default function SessionManager({
   const isPastSession = (date: Date) => {
     return new Date(date) < new Date();
   };
+
+  const allStatuses = ['scheduled', 'attended', 'canceled', 'missed'] as const;
 
   return (
     <div>
@@ -363,7 +398,7 @@ export default function SessionManager({
                 </Group>
               </Group>
 
-              {/* Quick Actions */}
+              {/* Quick Actions for scheduled sessions */}
               {session.status === 'scheduled' && (
                 <>
                   <Divider my="sm" />
@@ -382,9 +417,7 @@ export default function SessionManager({
                       size="xs"
                       variant="light"
                       color="yellow"
-                      onClick={() =>
-                        handleStatusUpdate(session._id, 'canceled')
-                      }
+                      onClick={() => handleCancelClick(session)}
                     >
                       Cancel
                     </Button>
@@ -396,6 +429,43 @@ export default function SessionManager({
                     >
                       Mark Missed
                     </Button>
+                  </Group>
+                </>
+              )}
+
+              {/* Status change menu for non-scheduled sessions */}
+              {session.status !== 'scheduled' && (
+                <>
+                  <Divider my="sm" />
+                  <Group gap="xs">
+                    <Menu shadow="md" width={180}>
+                      <Menu.Target>
+                        <Button
+                          size="xs"
+                          variant="light"
+                          color="gray"
+                          leftSection={<IconArrowsShuffle size={14} />}
+                        >
+                          Change Status
+                        </Button>
+                      </Menu.Target>
+                      <Menu.Dropdown>
+                        {allStatuses
+                          .filter(s => s !== session.status)
+                          .map(status => (
+                            <Menu.Item
+                              key={status}
+                              leftSection={getStatusIcon(status)}
+                              color={getStatusColor(status)}
+                              onClick={() =>
+                                handleStatusUpdate(session._id, status)
+                              }
+                            >
+                              {status.charAt(0).toUpperCase() + status.slice(1)}
+                            </Menu.Item>
+                          ))}
+                      </Menu.Dropdown>
+                    </Menu>
                   </Group>
                 </>
               )}
@@ -605,6 +675,24 @@ export default function SessionManager({
           </Stack>
         )}
       </Modal>
+
+      {/* Cancel/Reschedule Modal */}
+      {cancelTarget && (
+        <CancelRescheduleModal
+          opened={cancelModalOpened}
+          onClose={() => {
+            setCancelModalOpened(false);
+            setCancelTarget(null);
+          }}
+          studentName={cancelTarget.studentName}
+          studentPhone={cancelTarget.studentPhone}
+          studentId={cancelTarget.studentId}
+          date={cancelTarget.date}
+          time={cancelTarget.time}
+          sessionId={cancelTarget.sessionId}
+          onCompleted={handleCancelCompleted}
+        />
+      )}
     </div>
   );
 }
